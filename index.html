@@ -1,0 +1,209 @@
+<DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Truelens | AI Forensics</title>
+    <style>
+        /* Cyber-Forensic Glassmorphism Theme */
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0; padding: 20px; 
+            min-height: 100vh;
+            display: flex; align-items: center; justify-content: center;
+            background: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
+            color: #f8fafc;
+        }
+        
+        .glass-panel { 
+            background: rgba(30, 41, 59, 0.6); 
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            padding: 40px; 
+            border-radius: 20px; 
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 20px rgba(14, 165, 233, 0.2);
+            max-width: 800px; width: 100%; box-sizing: border-box;
+            position: relative;
+        }
+        
+        .brand { text-align: center; margin-bottom: 30px; }
+        .brand h1 { 
+            color: #fff; font-size: 42px; margin: 0; letter-spacing: 3px; text-transform: uppercase;
+            text-shadow: 0 0 15px rgba(14, 165, 233, 0.8);
+        }
+        .brand span { color: #0ea5e9; }
+        .brand p { color: #94a3b8; margin: 5px 0 0 0; font-size: 16px; letter-spacing: 1px; }
+
+        /* Upload Area */
+        #uploadSection { transition: all 0.4s ease; }
+        .upload-area { 
+            border: 2px dashed rgba(14, 165, 233, 0.5); padding: 60px 20px; text-align: center; 
+            border-radius: 16px; cursor: pointer; transition: 0.3s; 
+            background: rgba(14, 165, 233, 0.03); margin-bottom: 25px; 
+        }
+        .upload-area:hover { 
+            background: rgba(14, 165, 233, 0.1); border-color: #0ea5e9; 
+            box-shadow: inset 0 0 20px rgba(14, 165, 233, 0.2);
+        }
+        .upload-icon { width: 60px; height: 60px; stroke: #0ea5e9; margin-bottom: 15px; filter: drop-shadow(0 0 8px rgba(14,165,233,0.5)); }
+        .upload-text { font-size: 20px; color: #e2e8f0; font-weight: bold; }
+        .upload-text span { color: #38bdf8; text-decoration: none; }
+        input[type="file"] { display: none; }
+        
+        .btn { 
+            background: linear-gradient(135deg, #0ea5e9, #0284c7); color: white; border: none; 
+            padding: 16px; width: 100%; border-radius: 12px; font-size: 18px; cursor: pointer; 
+            font-weight: bold; transition: 0.3s; box-shadow: 0 8px 20px rgba(14,165,233,0.4); 
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+        .btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(14,165,233,0.6); }
+        .btn:disabled { background: #334155; cursor: not-allowed; box-shadow: none; color: #64748b; transform: none; }
+        
+        #loading { display: none; text-align: center; margin: 20px 0; color: #38bdf8; font-weight: bold; font-size: 18px; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; text-shadow: 0 0 10px #38bdf8;} 100% { opacity: 0.6; } }
+        
+        /* Results Area */
+        #results { display: none; animation: fadeIn 0.5s ease; position: relative; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* The X Button */
+        .close-btn {
+            position: absolute; top: -10px; right: -10px;
+            background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255,255,255,0.2);
+            color: #fff; font-size: 24px; width: 40px; height: 40px;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: 0.3s; z-index: 10;
+        }
+        .close-btn:hover { background: #ef4444; border-color: #ef4444; box-shadow: 0 0 15px rgba(239, 68, 68, 0.6); transform: rotate(90deg); }
+
+        /* Progress Bars */
+        .bar-label { display: block; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; margin-bottom: 5px; margin-top: 20px; }
+        .bar-bg { background: rgba(0,0,0,0.4); height: 40px; border-radius: 10px; position: relative; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); }
+        .fill-ai { height: 100%; background: linear-gradient(90deg, #be123c, #f43f5e); width: 0%; transition: width 1.5s cubic-bezier(0.2, 0.8, 0.2, 1); box-shadow: inset 0 0 10px rgba(255,255,255,0.2); }
+        .fill-real { height: 100%; background: linear-gradient(90deg, #047857, #10b981); width: 0%; transition: width 1.5s cubic-bezier(0.2, 0.8, 0.2, 1); box-shadow: inset 0 0 10px rgba(255,255,255,0.2); }
+        .bar-text { position: absolute; top: 10px; left: 15px; font-weight: bold; font-size: 18px; z-index: 2; text-shadow: 1px 1px 3px rgba(0,0,0,0.9); }
+        
+        /* Heatmap */
+        .heatmap-container { margin: 35px 0; text-align: center; background: rgba(0,0,0,0.3); padding: 25px; border-radius: 16px; border: 1px solid rgba(14,165,233,0.2); }
+        .heatmap-container h2 { color: #38bdf8; margin-top: 0; text-transform: uppercase; font-size: 18px; letter-spacing: 2px; }
+        .heatmap-container img { max-width: 100%; height: auto; border-radius: 12px; box-shadow: 0 15px 30px rgba(0,0,0,0.6); border: 2px solid rgba(14, 165, 233, 0.5); }
+        
+        .explanation-box { background: rgba(14, 165, 233, 0.05); padding: 25px; border-left: 4px solid #0ea5e9; border-radius: 0 12px 12px 0; line-height: 1.7; font-size: 16px; color: #cbd5e1; }
+    </style>
+</head>
+<body>
+
+<div class="glass-panel">
+    <div class="brand">
+        <h1>True<span>lens</span></h1>
+        <p>Neural Image Forensics & Heatmap Mapping</p>
+    </div>
+    
+    <!-- UPLOAD SECTION -->
+    <div id="uploadSection">
+        <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+            <svg class="upload-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 4V16M12 4L8 8M12 4L16 8M4 20H20" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <div class="upload-text" id="fileName">Drag and drop images here or <span>Browse</span></div>
+            <input type="file" id="fileInput" accept="image/*" onchange="handleFile(this)">
+        </div>
+        <button id="analyzeBtn" class="btn" onclick="analyzeImage()" disabled>Run Deep Scan</button>
+    </div>
+
+    <!-- LOADING TEXT -->
+    <div id="loading">Initializing Truelens Neural Network...</div>
+
+    <!-- RESULTS SECTION -->
+    <div id="results">
+        <!-- The X Button -->
+        <div class="close-btn" onclick="resetUI()" title="Scan another image">&times;</div>
+
+        <span class="bar-label">AI-Generated Probability</span>
+        <div class="bar-bg">
+            <span class="bar-text" id="aiText">0%</span>
+            <div class="fill-ai" id="aiFill"></div>
+        </div>
+
+        <span class="bar-label">Authentic Camera Probability</span>
+        <div class="bar-bg">
+            <span class="bar-text" id="realText">0%</span>
+            <div class="fill-real" id="realFill"></div>
+        </div>
+
+        <div class="heatmap-container">
+            <h2>Forensic Heatmap</h2>
+            <img id="heatmapImg" src="">
+        </div>
+
+        <div class="explanation-box" id="explanationText"></div>
+    </div>
+</div>
+
+<script>
+    let selectedFile = null;
+
+    function handleFile(input) {
+        if (input.files && input.files[0]) {
+            selectedFile = input.files[0];
+            document.getElementById('fileName').innerHTML = "<span style='color:#10b981;'>✓ Selected: " + selectedFile.name + "</span>";
+            document.getElementById('analyzeBtn').disabled = false;
+        }
+    }
+
+    async function analyzeImage() {
+        if (!selectedFile) return;
+        
+        // Hide Upload, Show Loading
+        document.getElementById('uploadSection').style.display = 'none';
+        document.getElementById('loading').style.display = 'block';
+
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+
+        try {
+            const response = await fetch('http://127.0.0.1:5000/analyze', { method: 'POST', body: formData });
+            const data = await response.json();
+            
+            if(data.error) { alert("Error: " + data.error); resetUI(); return; }
+
+            // Hide Loading, Show Results
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('results').style.display = 'block';
+
+            // Animate Progress Bars
+            setTimeout(() => {
+                document.getElementById('aiFill').style.width = data.ai_probability + '%';
+                document.getElementById('realFill').style.width = data.real_probability + '%';
+            }, 50);
+
+            document.getElementById('aiText').innerText = data.ai_probability + '%';
+            document.getElementById('realText').innerText = data.real_probability + '%';
+            
+            document.getElementById('heatmapImg').src = data.heatmap_base64;
+            document.getElementById('explanationText').innerText = data.explanation;
+
+        } catch (err) {
+            alert("Connection failed. Is the Python backend running?");
+            resetUI();
+        }
+    }
+
+    // New Function: Resets UI so you can scan the next image instantly
+    function resetUI() {
+        selectedFile = null;
+        document.getElementById('fileInput').value = "";
+        document.getElementById('fileName').innerHTML = "Drag and drop images here or <span>Browse</span>";
+        document.getElementById('analyzeBtn').disabled = true;
+        
+        document.getElementById('results').style.display = 'none';
+        document.getElementById('uploadSection').style.display = 'block';
+        
+        // Reset bars to 0% for next animation
+        document.getElementById('aiFill').style.width = '0%';
+        document.getElementById('realFill').style.width = '0%';
+    }
+</script>
+</body> 
+</html>

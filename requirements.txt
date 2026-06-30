@@ -1,0 +1,9 @@
+Flask==3.0.0
+Flask-Cors==4.0.0
+torch
+torchvision
+transformers
+Pillow
+numpy
+opencv-python
+grad-cam
